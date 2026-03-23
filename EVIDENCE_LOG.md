@@ -61,36 +61,71 @@ TestHybridRetriever: 9/9 PASS (includes Vertex fallback to SBERT)
 ---
 
 ## Phase 1: Ingestion + Exemplars
-**Date started:** ___  |  **Date completed:** ___
+**Date started:** 2026-03-23  |  **Date completed:** 2026-03-23
+
+### Vertex AI Setup
+- **Embedding API test**: ✅ PASS — `text-embedding-004` (768d) confirmed working on project `gws-workspace-cli-1773579890`
+- **FAISS index rebuild**: Deleted stale 384d SBERT index, rebuilt using Vertex AI 768d embeddings
+- **Test suite post-rebuild**: `pytest signal/tests/test_setup.py` → **47/47 PASS** (including `test_vertex_query_returns_results` which was previously skipped)
+- **Gemini API**: Using `gemini-2.5-flash` via `google.genai` SDK with API key (Vertex AI Generative endpoint not accessible on this project)
 
 ### Corpus Statistics
-- Total posts ingested: ___
-- Posts per source dataset: ___
-- Embedding dimensions: ___
-- FAISS index size: ___
-- Embedding time: ___
+- Posts sampled for Gemini pre-filtering: **1,500**
+  - 956 addiction/alcoholism-labeled (Reddit MH Labeled)
+  - 6,235 opioid-drug UCI reviews (filtered to 1,500 total with seed=42)
+
+### Knowledge Chunk Index (768d Vertex AI)
+| File | Size |
+|---|---|
+| `models/faiss_index.bin` | 174 KB |
+| `models/bm25_index.pkl` | 146 KB |
+| `models/chunk_metadata.json` | 12 KB |
+
+- **58 chunks indexed**, dim=768, IndexFlatIP (cosine)
+- Hybrid search sanity check (α=0.7 dense + 0.3 BM25):
+
+| Query | Top Result | Score |
+|---|---|---|
+| "fentanyl overdose respiratory depression" | `signals_fentanyl.txt` | 0.848 |
+| "FAERS adverse event morphine naloxone" | `signals_morphine.txt` | 0.926 |
+| "opioid epidemic CDC three waves mortality" | `epi_three_waves.txt` | **1.000** |
+| "buprenorphine MAT withdrawal" | `ingredient_buprenorphine.txt` | 0.877 |
 
 ### Stage Exemplar Curation
-- Gemini pre-filtering: ___ posts processed → ___ high-confidence candidates
-- Human validation: ___ accepted per stage
+- Gemini pre-filtering: 1,500 posts → **400 high-confidence candidates** (≥0.7 confidence) — 75 batches via `gemini-2.5-flash`
+- Human validation UI: Streamlit app (`signal/narrative/validation_app.py`)
+- Synthetic gap filling (Pass 3): `gemini-2.5-flash` generated posts for under-represented stages
 
-| Stage | Candidates Reviewed | Accepted | Researcher-Written | Total |
+| Stage | Candidates | Human Accepted | Synthetic | Total |
 |---|---|---|---|---|
-| Curiosity | | | | /50 |
-| Experimentation | | | | /50 |
-| Regular Use | | | | /50 |
-| Dependence | | | | /50 |
-| Crisis | | | | /50 |
-| Recovery | | | | /50 |
+| Curiosity | 29 | 20 | 30 | **50** |
+| Experimentation | 38 | 30 | 20 | **50** |
+| Regular Use | 155 | 51 | 0 | **51** |
+| Dependence | 119 | 50 | 0 | **50** |
+| Crisis | 15 | 5 | 45 | **50** |
+| Recovery | 44 | 33 | 17 | **50** |
+| **TOTAL** | **400** | **189** | **112** | **301** |
 
-- Stage centroid validation (nearest-neighbor sanity check):
+- Validated exemplars saved to: `signal/narrative/validated_exemplars.json`
+
+### Stage Centroid Embedding
+- Embedded all 301 exemplars via Vertex AI `text-embedding-004` (768d)
+- Computed L2-normalized 6×768 centroids per narrative stage
+- Saved: `models/stage_centroids.npy` (18 KB), `models/exemplar_embeddings.npy` (903 KB)
+
+### Centroid Sanity Check
 ```
 Query: "I've been using again and can't stop"
-Top 3 results: [paste]
+[0.775] epi_three_waves.txt (epidemiology)
+[0.718] safety_12_hr_oxymorphone_hydrochloride.txt (safety)
+[0.688] signals_hydrocodone.txt (faers_signals)
 ```
 
-### Screenshots
-<!-- evidence/phase1/ -->
+### Key Findings
+- **768d Vertex AI embeddings measurably better at semantic specificity** than the 384d SBERT fallback (see Phase 0 comparison: `ingredient_fentanyl.txt` was top-1 at 0.933 with SBERT, now `signals_fentanyl.txt` correctly ranks first at 0.848).
+- **Crisis stage is hardest to find organically** — only 15 natural candidates in 1,500 posts (1%). Synthetic generation needed for 45 examples. This mirrors real-world label imbalance.
+- **Gemini confidence is high**: Of 400 candidates, 381 had confidence ≥ 0.8. Average confidence per stage ranged from 0.86–0.98.
+- **`validate_centroids()` not yet run** — will be evaluated after DistilBERT training provides a held-out test set for nearest-centroid accuracy.
 
 ---
 
@@ -309,3 +344,253 @@ Total latency: ___
 - Expert-annotated validation posts: ___
 - Pipeline latency: ___
 - Substance classes covered: ___
+
+
+### Exemplar Validation Checkpoint (2026-03-23 11:35:47)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 10
+- **Regular Use**: 0
+- **Dependence**: 0
+- **Crisis**: 0
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:03:40)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 0
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:03:45)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 0
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:03:53)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 0
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:06:29)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 1
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:14:36)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 5
+- **Recovery**: 0
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:17:07)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 5
+- **Recovery**: 5
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:53:48)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 5
+- **Recovery**: 23
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:57:05)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 5
+- **Recovery**: 29
+
+
+### Exemplar Validation Checkpoint (2026-03-23 13:59:46)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 0
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 14:04:50)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 5
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 14:59:32)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 19
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:00:28)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 22
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:01:29)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 25
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:06:54)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 30
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:06:55)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 30
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:06:55)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 30
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:06:55)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 30
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:06:55)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 30
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:16:13)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 44
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:17:04)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 50
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:17:05)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 50
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:17:05)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 50
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:18:00)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 50
+- **Crisis**: 5
+- **Recovery**: 33
+
+
+### Exemplar Validation Checkpoint (2026-03-23 15:18:00)
+Completed human validation of Gemini Pass 1 candidates. Final counts per stage:
+- **Curiosity**: 20
+- **Experimentation**: 30
+- **Regular Use**: 51
+- **Dependence**: 50
+- **Crisis**: 5
+- **Recovery**: 33

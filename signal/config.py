@@ -34,7 +34,7 @@ VERTEX_PROJECT_ID: str = os.environ.get("GCP_PROJECT_ID", "gws-workspace-cli-177
 VERTEX_LOCATION: str = "us-central1"
 EMBEDDING_MODEL: str = "text-embedding-004"
 EMBEDDING_DIM: int = 768
-GEMINI_MODEL: str = "gemini-2.0-flash"
+GEMINI_MODEL: str = "gemini-2.5-flash"
 
 # Fallback embedding (local SBERT, no quota required)
 FALLBACK_EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -203,3 +203,29 @@ CHUNK_TYPES: tuple[str, ...] = (
 # Knowledge chunk settings (from reference_config.py)
 CHUNK_SIZE_TOKENS: int = 600
 CHUNK_OVERLAP_TOKENS: int = 100
+
+# ── Substance Resolution ───────────────────────────────────────────────────────
+
+# Ensemble weights (rule_based, embedding, llm)
+SUBSTANCE_ENSEMBLE_WEIGHTS: dict[str, float] = {
+    "rule_based": 0.35,
+    "embedding": 0.25,
+    "llm": 0.40,
+}
+SUBSTANCE_ENSEMBLE_THRESHOLD: float = 0.30
+SUBSTANCE_EMBEDDING_THRESHOLD: float = 0.72
+
+# Cache paths
+SUBSTANCE_EMBEDDINGS_CACHE: Path = CACHE_DIR / "substance_proto_embeddings.pkl"
+GEMINI_SUBSTANCE_CACHE_DIR: Path = CACHE_DIR / "gemini_substance"
+
+# NegEx configuration
+NEGEX_WINDOW_TOKENS: int = 40
+
+# Drug class labels
+DRUG_CLASS_LABELS: tuple[str, ...] = (
+    "opioid", "benzo", "stimulant", "alcohol", "cannabis", "other",
+)
+
+# Detection method identifiers
+DETECTION_METHODS: tuple[str, ...] = ("rule_based", "embedding", "llm")

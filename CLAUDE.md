@@ -135,7 +135,7 @@ SIGNAL/
 ## Current Progress
 <!-- UPDATE THIS SECTION AS WORK PROGRESSES -->
 - [x] Phase 0: Foundation (Day 1) — completed 2026-03-22
-- [ ] Phase 1: Ingestion + Exemplars (Days 2-3)
+- [x] Phase 1: Ingestion + Exemplars (Days 2-3)
 - [ ] Phase 2: Substance Resolution (Days 4-6)
 - [ ] Phase 3: Narrative Stages + DistilBERT (Days 7-10)
 - [ ] Phase 4: Clinical Grounding + Multi-Substance KB (Days 11-13)

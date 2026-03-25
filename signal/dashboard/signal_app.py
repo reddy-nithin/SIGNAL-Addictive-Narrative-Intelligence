@@ -6,6 +6,19 @@ Streamlit multi-page app. Run with:
 """
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_root = _Path(__file__).resolve().parent.parent.parent
+# Streamlit imports stdlib 'signal' before any page runs; pop it from the cache
+# so PathFinder can find our local signal/ package instead.
+if not getattr(_sys.modules.get("signal"), "__path__", None):
+    _sys.modules.pop("signal", None)
+    for _k in [k for k in _sys.modules if k.startswith("signal.")]:
+        _sys.modules.pop(_k, None)
+if str(_root) not in _sys.path:
+    _sys.path.insert(0, str(_root))
+
 import streamlit as st
 
 st.set_page_config(

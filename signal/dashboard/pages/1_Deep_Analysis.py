@@ -5,6 +5,17 @@ Paste any social media post → full 4-layer SIGNAL analysis.
 """
 from __future__ import annotations
 
+import sys as _sys
+from pathlib import Path as _Path
+
+_root = _Path(__file__).resolve().parent.parent.parent.parent
+if not getattr(_sys.modules.get("signal"), "__path__", None):
+    _sys.modules.pop("signal", None)
+    for _k in [k for k in _sys.modules if k.startswith("signal.")]:
+        _sys.modules.pop(_k, None)
+if str(_root) not in _sys.path:
+    _sys.path.insert(0, str(_root))
+
 import json
 from pathlib import Path
 
@@ -134,9 +145,15 @@ def _render_narrative(report):
     fig.update_layout(
         title="Ensemble Stage Confidence",
         xaxis_title="Confidence",
-        yaxis={"categoryorder": "array", "categoryarray": list(reversed(STAGE_ORDER))},
         height=300,
-        **PLOTLY_LAYOUT,
+        **{
+            **PLOTLY_LAYOUT,
+            "yaxis": {
+                **PLOTLY_LAYOUT.get("yaxis", {}),
+                "categoryorder": "array",
+                "categoryarray": list(reversed(STAGE_ORDER)),
+            },
+        },
     )
     st.plotly_chart(fig, use_container_width=True)
 

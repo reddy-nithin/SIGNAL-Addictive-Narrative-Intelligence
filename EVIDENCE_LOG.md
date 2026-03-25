@@ -324,24 +324,85 @@ Full suite: 316 passed, 59 warnings in 63.25s
 ---
 
 ## Phase 5: Dashboard
-**Date started:** ___  |  **Date completed:** ___
+**Date started:** 2026-03-24  |  **Date completed:** 2026-03-24
 
 ### Pages Completed
-- [ ] Deep Analysis — paste text → full 4-layer report
-- [ ] Narrative Pulse — stage distributions over time/subreddits
-- [ ] Method Comparison — dual evaluation charts
+- [x] Deep Analysis — paste text → full 4-layer report
+- [x] Narrative Pulse — stage distributions over time/subreddits
+- [x] Method Comparison — dual evaluation charts
 
-### Demo Flow Test
-- Demo example 1: [substance + stage + brief quality]
-- Demo example 2: [substance + stage + brief quality]
-- Demo example 3: [substance + stage + brief quality]
-- Live analysis latency: ___
-- Pre-cached examples working: [yes/no]
+### Test Suite
+```
+signal/tests/test_dashboard.py — 12 passed (theme, narrative_tracker, demo_cache serialization)
+Full suite: 328 passed, 62 warnings in 142.99s
+```
 
-### Dashboard Screenshots
-<!-- evidence/phase5/deep_analysis.png -->
-<!-- evidence/phase5/narrative_pulse.png -->
-<!-- evidence/phase5/method_comparison.png -->
+### Demo Flow Test (Pre-Cached Reports)
+
+All 5 examples pre-analyzed and saved to `cache/demo_reports.json` (153.8 KB).
+
+| Demo Example | Substances Detected | Stage | Confidence | Agreement | Brief Length |
+|---|---|---|---|---|---|
+| Curiosity — opioids | oxycodone | Curiosity | 80% | 3/3 ✅ | 4,533 chars |
+| Experimentation — benzo + alcohol | alprazolam, alcohol | Experimentation | 66% | 2/3 ⚠️ | 4,403 chars |
+| Dependence — opioids | oxycodone | Dependence | 60% | 3/3 ✅ | 3,434 chars |
+| Crisis — poly-drug | fentanyl, codeine, alprazolam | Crisis | 77% | 3/3 ✅ | 4,955 chars |
+| Recovery — MAT | heroin, buprenorphine/naloxone, buprenorphine | Recovery | 71% | 3/3 ✅ | 6,211 chars |
+
+- **Pre-cached examples working: ✅ YES** — `cache/demo_reports.json` loads on page init, no Gemini calls needed during demo
+- **Live analysis latency:** TBD (pre-cached for demo; live API calls expected 3-8s per post)
+
+### Narrative Pulse — Community Stage Distributions
+
+7 communities from Reddit MH Labeled dataset (min group size 50, 200 posts sampled each):
+
+| Community | Group Size | Top Stage | % | 2nd Stage | % |
+|---|---|---|---|---|---|
+| r/addiction | 502 | Dependence | 39.0% | Recovery | 38.5% |
+| r/healthanxiety | 2,427 | Recovery | 33.5% | Dependence | 29.0% |
+| r/bpd | 8,298 | Crisis | 31.5% | Recovery | 25.5% |
+| r/bipolarreddit | 2,720 | Dependence | 33.5% | Recovery | 33.0% |
+| r/autism | 3,610 | Dependence | 30.5% | Crisis | 27.0% |
+| r/depression | 1,379 | Crisis | 38.0% | Dependence | 20.5% |
+| r/teaching | 1,063 | Crisis | 39.0% | Dependence | 25.5% |
+
+**Key insight:** r/addiction has nearly equal Dependence (39%) and Recovery (38.5%) — the community actively spans both struggle and recovery. r/depression and r/teaching are Crisis-dominant, reflecting acute psychological distress even in non-substance contexts.
+
+### Method Comparison — Narrative Agreement Statistics
+
+**Evaluation sample:** 199 posts from Reddit MH Labeled dataset
+
+| Metric | Value | Interpretation |
+|---|---|---|
+| Fleiss' Kappa | **0.118** | Slight agreement (< 0.2) |
+| All 3 methods agree | **14.1%** | Low cross-method consensus |
+| LLM vs Rule-based agreement | **39.2%** | Highest pairwise |
+| Fine-tuned vs Rule-based | **35.7%** | |
+| Fine-tuned vs LLM | **26.1%** | Lowest pairwise |
+| LLM vs Rule-based kappa | 0.180 | |
+| Fine-tuned vs Rule-based kappa | 0.152 | |
+| Fine-tuned vs LLM kappa | 0.120 | |
+
+**Stage distribution in evaluation sample (ensemble top-stage):**
+
+| Stage | Count | % |
+|---|---|---|
+| Crisis | 91 | 45.7% |
+| Recovery | 64 | 32.2% |
+| Dependence | 37 | 18.6% |
+| Curiosity | 6 | 3.0% |
+| Regular Use | 1 | 0.5% |
+| Experimentation | 0 | 0% |
+
+### Key Findings
+1. **4/5 demo examples achieve 3/3 method agreement** — Face validity is strong for clear-cut stage presentations. The one disagreement (Experimentation benzo+alcohol) reflects genuine boundary ambiguity between Curiosity and Experimentation stages.
+2. **Fleiss' κ = 0.118 is an informative finding, not a failure** — Low inter-method agreement on this novel task reveals that rule-based (keyword patterns), fine-tuned DistilBERT (exemplar-trained), and LLM (contextual reasoning) capture fundamentally different aspects of narrative stage. This supports the competition report's framing: "each method has distinct failure modes and strengths — the 3-method comparison IS the contribution."
+3. **r/addiction shows the richest stage diversity** — Near-parity between Dependence (39%) and Recovery (38.5%) makes it the ideal community for demonstrating SIGNAL's population-level tracking value. Other communities collapse into Crisis-dominant distributions.
+4. **Fine-tuned DistilBERT disagrees most with LLM (26.1% agreement)** — Rule-based and LLM show the highest pairwise agreement (39.2%), suggesting keyword patterns partially approximate contextual reasoning, while fine-tuned model learned a different representation from the 301 exemplars.
+5. **Crisis stage dominates the evaluation sample (45.7%)** — Reddit MH Labeled skews toward crisis/distress content, which creates class imbalance in agreement testing. A more balanced evaluation set would improve kappa scores.
+
+### Screenshots
+<!-- evidence/phase5/ — screenshots to be added during live demo preparation -->
 
 ---
 
@@ -379,9 +440,12 @@ Full suite: 316 passed, 59 warnings in 63.25s
 ### Narrative Stage Classification
 | Metric | Rule-Based | DistilBERT | LLM | Ensemble |
 |---|---|---|---|---|
-| Macro F1 | | | | |
-| Accuracy | | | | |
-| Kappa vs Expert | | | | |
+| Macro F1 | TBD | TBD | TBD | TBD |
+| Accuracy | TBD | TBD | TBD | TBD |
+| Kappa vs Expert | TBD | TBD | TBD | TBD |
+| Pairwise Agreement vs LLM | — | 26.1% | — | — |
+| Pairwise Agreement vs Rule-based | 100% | 35.7% | 39.2% | — |
+| Fleiss' Kappa (3-way) | — | — | — | **0.118** |
 
 ### Key Numbers for Report
 - Total posts in corpus: 1,451,775

@@ -139,7 +139,7 @@ SIGNAL/
 - [x] Phase 2: Substance Resolution (Days 4-6) — completed 2026-03-23
 - [x] Phase 3: Narrative Stages + DistilBERT (Days 7-10) — completed 2026-03-23
 - [x] Phase 4: Clinical Grounding + Multi-Substance KB (Days 11-13) — completed 2026-03-24
-- [ ] Phase 5: Dashboard (Days 14-15)
+- [x] Phase 5: Dashboard (Days 14-15) — completed 2026-03-24
 - [ ] Phase 6: Polish + Submit (Day 16)
 
 ## Rules for Claude Code Sessions

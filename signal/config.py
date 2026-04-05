@@ -13,18 +13,11 @@ from pathlib import Path
 
 
 def _get_secret(key: str, default: str | None = None) -> str | None:
-    """Read a secret from env var, then Streamlit secrets, then default.
-
-    Works in both local (os.environ) and Streamlit Cloud (st.secrets) contexts.
-    """
+    """Read a secret from env var, then default."""
     value = os.environ.get(key)
     if value:
         return value
-    try:
-        import streamlit as st  # noqa: PLC0415
-        return st.secrets.get(key, default)
-    except Exception:
-        return default
+    return default
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
@@ -46,8 +39,8 @@ BM25_INDEX_PATH: Path = MODELS_DIR / "bm25_index.pkl"
 CHUNK_METADATA_PATH: Path = MODELS_DIR / "chunk_metadata.json"
 
 # ── Vertex AI / Gemini ────────────────────────────────────────────────────────
-# Bootstrap GCP service account from Streamlit secret when running on Streamlit Cloud.
-# Store the full service account JSON under the secret key GOOGLE_APPLICATION_CREDENTIALS_JSON.
+# Bootstrap GCP service account from JSON environment variable if available.
+# Store the full service account JSON under the env var GOOGLE_APPLICATION_CREDENTIALS_JSON.
 _gac_json = _get_secret("GOOGLE_APPLICATION_CREDENTIALS_JSON")
 if _gac_json and not os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     _tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)

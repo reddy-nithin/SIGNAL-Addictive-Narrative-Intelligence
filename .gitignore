@@ -16,3 +16,5 @@ cache/*
 !cache/method_comparison.json
 !cache/narrative_distributions.json
 !cache/substance_proto_embeddings.pkl
+opioid_data/
+.DS_Store

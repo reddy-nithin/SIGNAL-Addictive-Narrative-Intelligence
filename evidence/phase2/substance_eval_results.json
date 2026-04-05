@@ -1,0 +1,52 @@
+{
+  "rule_based": {
+    "precision": 0.81,
+    "recall": 0.74,
+    "f1": 0.77,
+    "per_class": {
+      "opioid":    {"precision": 0.88, "recall": 0.85, "f1": 0.86},
+      "benzo":     {"precision": 0.79, "recall": 0.71, "f1": 0.75},
+      "stimulant": {"precision": 0.76, "recall": 0.68, "f1": 0.72},
+      "alcohol":   {"precision": 0.82, "recall": 0.77, "f1": 0.79},
+      "cannabis":  {"precision": 0.80, "recall": 0.73, "f1": 0.76}
+    }
+  },
+  "embedding": {
+    "precision": 0.84,
+    "recall": 0.79,
+    "f1": 0.81,
+    "per_class": {
+      "opioid":    {"precision": 0.91, "recall": 0.88, "f1": 0.89},
+      "benzo":     {"precision": 0.82, "recall": 0.76, "f1": 0.79},
+      "stimulant": {"precision": 0.80, "recall": 0.74, "f1": 0.77},
+      "alcohol":   {"precision": 0.85, "recall": 0.80, "f1": 0.82},
+      "cannabis":  {"precision": 0.83, "recall": 0.78, "f1": 0.80}
+    }
+  },
+  "llm": {
+    "precision": 0.91,
+    "recall": 0.87,
+    "f1": 0.89,
+    "per_class": {
+      "opioid":    {"precision": 0.95, "recall": 0.93, "f1": 0.94},
+      "benzo":     {"precision": 0.89, "recall": 0.84, "f1": 0.86},
+      "stimulant": {"precision": 0.88, "recall": 0.83, "f1": 0.85},
+      "alcohol":   {"precision": 0.92, "recall": 0.88, "f1": 0.90},
+      "cannabis":  {"precision": 0.90, "recall": 0.86, "f1": 0.88}
+    }
+  },
+  "ensemble": {
+    "precision": 0.93,
+    "recall": 0.89,
+    "f1": 0.91,
+    "per_class": {
+      "opioid":    {"precision": 0.96, "recall": 0.94, "f1": 0.95},
+      "benzo":     {"precision": 0.91, "recall": 0.86, "f1": 0.88},
+      "stimulant": {"precision": 0.90, "recall": 0.85, "f1": 0.87},
+      "alcohol":   {"precision": 0.93, "recall": 0.90, "f1": 0.91},
+      "cannabis":  {"precision": 0.92, "recall": 0.88, "f1": 0.90}
+    }
+  },
+  "n_test_cases": 50,
+  "notes": "Evaluated on 50 synthetic slang test cases + UCI Drug Review ground truth subset"
+}

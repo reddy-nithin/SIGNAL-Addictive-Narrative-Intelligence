@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIGNAL — Substance Intelligence</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'exo': ['"Exo 2"', 'sans-serif'],
+            'grotesk': ['"Space Grotesk"', 'sans-serif'],
+            'mono': ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            'signal': {
+              'bg':    '#0a0a0f',
+              'card':  '#1a1a2e',
+              'blue':  '#00d4ff',
+              'red':   '#ff3b5c',
+              'green': '#10b981',
+              'amber': '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/main.css?v=4">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       Fixed Navigation Bar
+       Populated and managed by nav.js
+  ═══════════════════════════════════════════════ -->
+  <nav id="main-nav" role="navigation" aria-label="Primary navigation">
+    <!-- Populated by nav.js -->
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════
+       Main App Container
+       The client-side router (app.js) injects page
+       content into this element.
+  ═══════════════════════════════════════════════ -->
+  <!-- Bokeh background orbs (always visible behind page content) -->
+  <div class="page-bg-bokeh" aria-hidden="true">
+    <div class="bokeh-orb bokeh-orb-3"></div>
+  </div>
+
+  <main id="app" class="min-h-screen" role="main">
+
+    <!-- Initial boot splash — hidden once app.js initialises -->
+    <div id="loading-init" class="flex items-center justify-center min-h-screen" aria-live="polite" aria-busy="true">
+      <div class="text-center">
+        <div class="signal-scanner mb-4" role="progressbar" aria-label="Loading"></div>
+        <div class="font-exo text-2xl font-bold text-signal-blue glow-text tracking-widest">SIGNAL</div>
+        <div class="text-secondary mt-2 font-mono text-sm tracking-wide">
+          Initializing intelligence systems&hellip;
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════
+       Analysis Loading Overlay
+       Shown during the full 4-layer pipeline run.
+       Managed by analysis.js / pipeline.js.
+  ═══════════════════════════════════════════════ -->
+  <div
+    id="analysis-overlay"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Analysis in progress"
+    aria-live="polite"
+  >
+    <!-- Blurred backdrop -->
+    <div class="signal-overlay-backdrop" aria-hidden="true"></div>
+
+    <!-- Overlay card -->
+    <div class="glass-card glass-floating p-8 text-center max-w-sm w-full mx-4 relative z-10">
+      <div class="signal-pulse-ring mb-6" aria-hidden="true"></div>
+
+      <div class="font-exo text-xl font-bold text-bright mb-1 tracking-widest uppercase">
+        Analyzing
+      </div>
+      <div id="overlay-status" class="text-secondary text-sm font-mono mb-5">
+        Running 4-layer pipeline&hellip;
+      </div>
+
+      <!-- Per-layer progress steps -->
+      <div class="space-y-2" id="overlay-progress" role="list">
+        <div class="progress-step" data-step="substance" role="listitem">
+          <div class="step-icon-wrap" aria-hidden="true">
+            <svg class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path class="check-path" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="step-spinner"></span>
+          </div>
+          <div class="step-text">
+            <div class="step-label">Substance Resolution</div>
+            <div class="step-sublabel">Resolving slang → clinical entities</div>
+          </div>
+        </div>
+        <div class="progress-step" data-step="narrative" role="listitem">
+          <div class="step-icon-wrap" aria-hidden="true">
+            <svg class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path class="check-path" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="step-spinner"></span>
+          </div>
+          <div class="step-text">
+            <div class="step-label">Narrative Stage</div>
+            <div class="step-sublabel">Classifying addiction arc position</div>
+          </div>
+        </div>
+        <div class="progress-step" data-step="clinical" role="listitem">
+          <div class="step-icon-wrap" aria-hidden="true">
+            <svg class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path class="check-path" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="step-spinner"></span>
+          </div>
+          <div class="step-text">
+            <div class="step-label">Clinical Grounding</div>
+            <div class="step-sublabel">Retrieving pharmacological evidence</div>
+          </div>
+        </div>
+        <div class="progress-step" data-step="brief" role="listitem">
+          <div class="step-icon-wrap" aria-hidden="true">
+            <svg class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path class="check-path" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="step-spinner"></span>
+          </div>
+          <div class="step-text">
+            <div class="step-label">Analyst Brief</div>
+            <div class="step-sublabel">Synthesizing intelligence report</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       Toast Notification Container
+       Toasts are injected here by ui.js
+  ═══════════════════════════════════════════════ -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       JS Modules — loaded as ES modules so they can
+       import each other without a bundler.
+  ═══════════════════════════════════════════════ -->
+  <!-- IIFE bundles — must load before the ES module so window.Charts
+       and window.AnalysisRenderer are available when pages render. -->
+  <script src="/static/js/components/charts.js?v=4"></script>
+  <script src="/static/js/components/analysis.js?v=4"></script>
+
+  <script type="module" src="/static/js/app.js?v=4"></script>
+
+  <!-- GSAP Animation Library + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+
+</body>
+</html>

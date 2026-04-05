@@ -15,7 +15,7 @@ SIGNAL is an advanced natural language processing pipeline and web application d
 
 SIGNAL takes raw unstructured text (e.g., from Reddit or clinical forums) and processes it through a sophisticated **4-Layer Architecture** to produce evidence-cited, clinical-grade analyst briefs for public health monitoring.
 
-![SIGNAL Hero Splash](evidence/screenshots/hero_page.png)
+![SIGNAL Landing Page](evidence/screenshots/landing_page.png)
 
 ### The 4-Layer Architecture:
 1. **Substance Resolution**: Intelligently resolves street slang and informal drug names to their exact clinical equivalents utilizing an ensemble of rule-based lexicons, SBERT embeddings, and Gemini LLMs.

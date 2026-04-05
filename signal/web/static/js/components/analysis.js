@@ -201,26 +201,34 @@
         margin-bottom: 8px;
       }
 
+      /* ---- Grid Layouts for Content ---- */
+      .ar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+
       /* ---- Tabs ---- */
       .ar-tab-container {
-        background: rgba(26,26,46,0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(0,212,255,0.1);
-        border-radius: 12px;
-        overflow: hidden;
+        width: 100%;
       }
       .ar-tab-bar {
+        position: relative;
         display: flex;
-        border-bottom: 1px solid rgba(0,212,255,0.1);
-        background: rgba(10,10,25,0.4);
-        overflow-x: auto;
+        width: fit-content;
+        margin: 0 auto 20px auto;
+        background: rgba(10,10,25,0.6);
+        border: 1px solid rgba(0,212,255,0.15);
+        border-radius: 999px;
+        padding: 4px;
+        z-index: 1;
       }
       .ar-tab-btn {
-        flex-shrink: 0;
-        padding: 12px 20px;
+        position: relative;
+        z-index: 10;
+        padding: 10px 18px;
         background: none;
         border: none;
-        border-bottom: 2px solid transparent;
         color: #94a3b8;
         font-family: 'Roboto Mono', monospace;
         font-size: 11px;
@@ -228,11 +236,25 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         cursor: pointer;
-        transition: color 0.2s, border-color 0.2s;
+        transition: color 0.3s;
+        border-radius: 999px;
       }
       .ar-tab-btn:hover { color: #e2e8f0; }
-      .ar-tab-btn.active { color: #00d4ff; border-bottom-color: #00d4ff; }
-      .ar-tab-panel { display: none; padding: 20px; }
+      .ar-tab-btn.active { color: #fff; }
+      .ar-slide-cursor {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        z-index: 0;
+        background: rgba(0,212,255,0.15);
+        border: 1px solid rgba(0,212,255,0.4);
+        border-radius: 999px;
+        box-shadow: 0 0 10px rgba(0,212,255,0.2);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+        opacity: 0;
+      }
+      .ar-tab-panel { display: none; padding: 24px; background: rgba(26,26,46,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(0,212,255,0.1); border-radius: 12px; }
       .ar-tab-panel.active { display: block; }
 
       /* ---- Substance cards ---- */
@@ -590,7 +612,9 @@
 
     return `
 <div class="ar-tab-container">
-  <div class="ar-tab-bar" id="ar-tabs-${uid}">${tabBtns}</div>
+  <div class="ar-tab-bar" id="ar-tabs-${uid}">
+    ${tabBtns}
+  </div>
   ${panels}
 </div>`.trim();
   }
@@ -668,7 +692,7 @@
 </div>`.trim();
     }).join('\n');
 
-    return cards;
+    return `<div class="ar-grid">\n${cards}\n</div>`;
   }
 
   // ---- Tab 2: Narrative Stage ----
@@ -833,7 +857,7 @@ ${confidenceSection}
     <div class="ar-intel-substance-name" style="color:${color}">${escapeHtml(substance)}</div>
     <span class="ar-drug-class-pill" style="background:${color}22;color:${color};border:1px solid ${color}44;margin:0">${escapeHtml(drugClass)}</span>
   </div>
-  ${chunkCards || '<div class="ar-no-data" style="font-size:11px">No knowledge chunks retrieved.</div>'}
+  ${chunkCards ? `<div class="ar-grid">${chunkCards}</div>` : '<div class="ar-no-data" style="font-size:11px">No knowledge chunks retrieved.</div>'}
   ${faersSection}
 </div>`.trim();
     }).join(`<div class="ar-section-divider"></div>`);
@@ -1076,11 +1100,57 @@ ${confidenceSection}
     }
   }
 
+  function _initSlideTabs(uid) {
+    const bar = document.getElementById(`ar-tabs-${uid}`);
+    if (!bar) return;
+    
+    let cursor = bar.querySelector('.ar-slide-cursor');
+    if (!cursor) {
+      cursor = document.createElement('div');
+      cursor.className = 'ar-slide-cursor';
+      bar.appendChild(cursor);
+    }
+
+    const tabs = Array.from(bar.querySelectorAll('.ar-tab-btn'));
+    let activeTab = tabs.find(t => t.classList.contains('active')) || tabs[0];
+
+    function updateCursor(tab) {
+      if (!tab) return;
+      const left = tab.offsetLeft;
+      const width = tab.offsetWidth;
+      cursor.style.left = `${left}px`;
+      cursor.style.width = `${width}px`;
+      cursor.style.opacity = '1';
+    }
+
+    requestAnimationFrame(() => updateCursor(activeTab));
+
+    tabs.forEach(tab => {
+      tab.addEventListener('mouseenter', () => updateCursor(tab));
+      tab.addEventListener('click', () => {
+        activeTab = tab;
+        updateCursor(tab);
+      });
+    });
+
+    bar.addEventListener('mouseleave', () => {
+       updateCursor(activeTab);
+    });
+    
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(() => updateCursor(activeTab));
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // Main render function
   // ---------------------------------------------------------------------------
 
-  function render(container, report) {
+  function render(container, tabsContainer, report) {
+    if (arguments.length === 2) {
+      report = tabsContainer;
+      tabsContainer = null;
+    }
     if (!container || !report) return;
 
     injectStyles();
@@ -1105,23 +1175,33 @@ ${confidenceSection}
     });
     _lastFaersSignals[uid] = faersByElId;
 
-    // Compose full HTML — set all animated elements invisible initially
-    const html = [
+    const summaryHtml = [
       _renderRiskBanner(report),
       _renderQuickMetrics(report),
       _renderHighlightedText(report),
-      _renderTabs(report, uid),
     ].join('\n');
 
-    container.innerHTML = html;
+    const tabsHtml = _renderTabs(report, uid);
+
+    if (tabsContainer) {
+      container.innerHTML = summaryHtml;
+      tabsContainer.innerHTML = tabsHtml;
+    } else {
+      container.innerHTML = summaryHtml + '\n' + tabsHtml;
+    }
 
     // Phase 5D — cinematic entrance choreography
     requestAnimationFrame(() => {
       choreographResultsEntrance(container);
+      if (tabsContainer) {
+        choreographResultsEntrance(tabsContainer);
+      }
 
       // Phase 5E — burst the active stage arc node
-      const activeNode = container.querySelector('.ar-arc-node.active');
+      const activeNode = (tabsContainer || container).querySelector('.ar-arc-node.active');
       if (activeNode) burstStageNode(activeNode);
+
+      _initSlideTabs(uid);
     });
   }
 

@@ -307,6 +307,11 @@ function buildAnalysisConsole() {
       </div>
 
     </div>
+
+    <!-- BOTTOM: Full-width tabs panel -->
+    <div id="results-tabs-panel" style="width: 100%; margin-top: 24px; position: relative;">
+      <div id="results-tabs-content" style="display: none; opacity: 0; transform: translateY(20px); transition: opacity 0.35s ease, transform 0.35s ease;"></div>
+    </div>
   </div>
 </section>`;
 }
@@ -325,11 +330,13 @@ function buildAnalysisConsole() {
  * Show the results panel with an animation; delegate actual content
  * rendering to window.AnalysisRenderer if available.
  * @param {HTMLElement} container - The #results-panel element
+ * @param {HTMLElement} tabsContainer - The #results-tabs-panel element
  * @param {object}      report    - Pipeline result from the API
  */
-function renderResults(container, report) {
+function renderResults(container, tabsContainer, report) {
   const placeholder = container.querySelector('#results-placeholder');
   const content     = container.querySelector('#results-content');
+  const tabsContent = tabsContainer ? tabsContainer.querySelector('#results-tabs-content') : null;
   if (!content) return;
 
   // Hide placeholder
@@ -337,9 +344,14 @@ function renderResults(container, report) {
 
   // Clear previous content
   content.innerHTML = '';
+  if (tabsContent) tabsContent.innerHTML = '';
 
   if (window.AnalysisRenderer) {
-    window.AnalysisRenderer.render(content, report);
+    if (window.AnalysisRenderer.render.length === 3) {
+      window.AnalysisRenderer.render(content, tabsContent, report);
+    } else {
+      window.AnalysisRenderer.render(content, report);
+    }
   } else {
     // Minimal fallback renderer when analysis.js is not yet loaded
     content.innerHTML = buildFallbackResults(report);
@@ -347,19 +359,36 @@ function renderResults(container, report) {
 
   // Show and animate content
   content.style.display = 'block';
+  if (tabsContent) tabsContent.style.display = 'block';
+
   if (typeof gsap !== 'undefined') {
     gsap.fromTo(content,
       { opacity: 0, x: 24 },
       { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out' }
     );
+    if (tabsContent) {
+      gsap.fromTo(tabsContent,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', delay: 0.1 }
+      );
+    }
   } else {
     content.style.opacity = '0';
     content.style.transform = 'translateX(20px)';
+    if (tabsContent) {
+      tabsContent.style.opacity = '0';
+      tabsContent.style.transform = 'translateY(20px)';
+    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         content.style.opacity = '1';
         content.style.transform = 'translateX(0)';
         content.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+        if (tabsContent) {
+          tabsContent.style.opacity = '1';
+          tabsContent.style.transform = 'translateY(0)';
+          tabsContent.style.transition = 'opacity 0.35s ease, transform 0.35s ease 0.1s';
+        }
       });
     });
   }
@@ -502,6 +531,7 @@ function wireAnalysisEvents(section) {
   const btnText     = section.querySelector('#analyze-btn-text');
   const spinner     = section.querySelector('#analyze-spinner');
   const resultsPanel = section.querySelector('#results-panel');
+  const resultsTabsPanel = section.querySelector('#results-tabs-panel');
 
   if (!demoSelect || !textarea || !analyzeBtn || !resultsPanel) return;
 
@@ -564,7 +594,7 @@ function wireAnalysisEvents(section) {
         if (window.updateOverlayStep) window.updateOverlayStep(s, 'done');
       });
 
-      renderResults(resultsPanel, report);
+      renderResults(resultsPanel, resultsTabsPanel, report);
       if (window.showToast) window.showToast(`Demo loaded: ${label}`, 'success');
 
     } catch (err) {
@@ -614,7 +644,7 @@ function wireAnalysisEvents(section) {
       clearInterval(stepTimer);
       steps.forEach(s => { if (window.updateOverlayStep) window.updateOverlayStep(s, 'done'); });
 
-      renderResults(resultsPanel, report);
+      renderResults(resultsPanel, resultsTabsPanel, report);
       if (window.showToast) window.showToast('Analysis complete', 'success');
 
     } catch (err) {

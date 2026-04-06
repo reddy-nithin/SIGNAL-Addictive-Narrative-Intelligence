@@ -10,21 +10,21 @@
   // ---------------------------------------------------------------------------
 
   const STAGE_COLORS = {
-    curiosity:      '#22d3ee',
-    experimentation:'#3b82f6',
-    regular_use:    '#f59e0b',
-    dependence:     '#f97316',
-    crisis:         '#ef4444',
-    recovery:       '#10b981',
+    curiosity: '#22d3ee',
+    experimentation: '#3b82f6',
+    regular_use: '#f59e0b',
+    dependence: '#f97316',
+    crisis: '#ef4444',
+    recovery: '#10b981',
   };
 
   const STAGE_LABELS = {
-    curiosity:      'Curiosity',
-    experimentation:'Experimentation',
-    regular_use:    'Regular Use',
-    dependence:     'Dependence',
-    crisis:         'Crisis',
-    recovery:       'Recovery',
+    curiosity: 'Curiosity',
+    experimentation: 'Experimentation',
+    regular_use: 'Regular Use',
+    dependence: 'Dependence',
+    crisis: 'Crisis',
+    recovery: 'Recovery',
   };
 
   // Canonical ordered array used for arc rendering
@@ -32,29 +32,29 @@
 
   // Map display names (from API) → canonical keys
   const STAGE_NAME_TO_KEY = {
-    'Curiosity':       'curiosity',
+    'Curiosity': 'curiosity',
     'Experimentation': 'experimentation',
-    'Regular Use':     'regular_use',
-    'Dependence':      'dependence',
-    'Crisis':          'crisis',
-    'Recovery':        'recovery',
+    'Regular Use': 'regular_use',
+    'Dependence': 'dependence',
+    'Crisis': 'crisis',
+    'Recovery': 'recovery',
   };
 
   const DRUG_CLASS_COLORS = {
-    opioid:   '#ef4444',
-    benzo:    '#f59e0b',
-    stimulant:'#3b82f6',
-    alcohol:  '#a855f7',
+    opioid: '#ef4444',
+    benzo: '#f59e0b',
+    stimulant: '#3b82f6',
+    alcohol: '#a855f7',
     cannabis: '#22c55e',
-    other:    '#94a3b8',
+    other: '#94a3b8',
   };
 
   const METHOD_LABELS = {
     rule_based: 'Rule-Based',
     fine_tuned: 'DistilBERT',
-    llm:        'LLM',
-    embedding:  'Embedding',
-    ensemble:   'Ensemble',
+    llm: 'LLM',
+    embedding: 'Embedding',
+    ensemble: 'Ensemble',
   };
 
   // ---------------------------------------------------------------------------
@@ -443,15 +443,15 @@
   // ---------------------------------------------------------------------------
 
   function _renderRiskBanner(report) {
-    const stage     = report?.narrative_results?.top_stage?.stage
-                   ?? report?.narrative_stage?.stage
-                   ?? 'Unknown';
-    const confidence= report?.narrative_results?.top_stage?.confidence
-                   ?? report?.narrative_stage?.confidence
-                   ?? 0;
-    const stageKey  = toStageKey(stage);
-    const color     = STAGE_COLORS[stageKey] ?? '#94a3b8';
-    const label     = STAGE_LABELS[stageKey] ?? stage;
+    const stage = report?.narrative_results?.top_stage?.stage
+      ?? report?.narrative_stage?.stage
+      ?? 'Unknown';
+    const confidence = report?.narrative_results?.top_stage?.confidence
+      ?? report?.narrative_stage?.confidence
+      ?? 0;
+    const stageKey = toStageKey(stage);
+    const color = STAGE_COLORS[stageKey] ?? '#94a3b8';
+    const label = STAGE_LABELS[stageKey] ?? stage;
 
     return `
 <div class="ar-risk-banner ${escapeHtml(stageKey)}" role="alert">
@@ -473,18 +473,18 @@
     const uniqueNames = new Set(substances.map(s => s.clinical_name ?? s.name ?? ''));
     const substanceCount = uniqueNames.size;
 
-    const stage     = report?.narrative_results?.top_stage?.stage
-                   ?? report?.narrative_stage?.stage
-                   ?? '—';
-    const stageKey  = toStageKey(stage);
-    const stageColor= STAGE_COLORS[stageKey] ?? '#94a3b8';
-    const stageLabel= STAGE_LABELS[stageKey] ?? stage;
+    const stage = report?.narrative_results?.top_stage?.stage
+      ?? report?.narrative_stage?.stage
+      ?? '—';
+    const stageKey = toStageKey(stage);
+    const stageColor = STAGE_COLORS[stageKey] ?? '#94a3b8';
+    const stageLabel = STAGE_LABELS[stageKey] ?? stage;
 
-    const confidence= report?.narrative_results?.top_stage?.confidence
-                   ?? report?.narrative_stage?.confidence
-                   ?? 0;
+    const confidence = report?.narrative_results?.top_stage?.confidence
+      ?? report?.narrative_stage?.confidence
+      ?? 0;
 
-    const elapsed   = report?.elapsed_ms ?? null;
+    const elapsed = report?.elapsed_ms ?? null;
 
     const metrics = [
       {
@@ -538,7 +538,7 @@
     if (sorted.length > 0) {
       for (const match of sorted) {
         const start = match.char_start ?? 0;
-        const end   = match.char_end ?? start;
+        const end = match.char_end ?? start;
         if (start < cursor) continue; // skip overlaps
 
         highlighted += escapeHtml(text.slice(cursor, start));
@@ -589,10 +589,10 @@
 
   function _renderTabs(report, uid) {
     const tabs = [
-      { id: 'substances',      label: 'SUBSTANCES' },
-      { id: 'narrative',       label: 'NARRATIVE STAGE' },
-      { id: 'clinical',        label: 'CLINICAL INTEL' },
-      { id: 'brief',           label: 'ANALYST BRIEF' },
+      { id: 'substances', label: 'SUBSTANCES' },
+      { id: 'narrative', label: 'NARRATIVE STAGE' },
+      { id: 'clinical', label: 'CLINICAL INTEL' },
+      { id: 'brief', label: 'ANALYST BRIEF' },
     ];
 
     const tabBtns = tabs.map((t, i) => `
@@ -622,10 +622,10 @@
   function _renderTabContent(tabId, report, uid) {
     switch (tabId) {
       case 'substances': return _renderSubstancesTab(report);
-      case 'narrative':  return _renderNarrativeTab(report, uid);
-      case 'clinical':   return _renderClinicalTab(report, uid);
-      case 'brief':      return _renderBriefTab(report);
-      default:           return '';
+      case 'narrative': return _renderNarrativeTab(report, uid);
+      case 'clinical': return _renderClinicalTab(report, uid);
+      case 'brief': return _renderBriefTab(report);
+      default: return '';
     }
   }
 
@@ -649,7 +649,7 @@
     const cards = [...byName.values()].map(m => {
       const drugClass = (m.drug_class ?? 'other').toLowerCase();
       const color = drugClassColor(drugClass);
-      const conf  = clamp01(m.confidence ?? 0);
+      const conf = clamp01(m.confidence ?? 0);
       const votes = m.method_votes ?? {};
 
       // Determine vote status from method_results if method_votes not present
@@ -662,7 +662,7 @@
         } else {
           // Try to infer from method_results
           const methodResults = report?.substance_results?.method_results ?? [];
-          const methodResult  = methodResults.find(r => r.method === mk);
+          const methodResult = methodResults.find(r => r.method === mk);
           if (methodResult) {
             const clinicalName = m.clinical_name ?? m.name ?? '';
             voted = (methodResult.matches ?? []).some(
@@ -671,7 +671,7 @@
           }
         }
         const label = METHOD_LABELS[mk] ?? mk;
-        if (voted === true)  return `<span class="ar-method-vote voted">\u2713 ${escapeHtml(label)}</span>`;
+        if (voted === true) return `<span class="ar-method-vote voted">\u2713 ${escapeHtml(label)}</span>`;
         if (voted === false) return `<span class="ar-method-vote abstain">\u2715 ${escapeHtml(label)}</span>`;
         return `<span class="ar-method-vote">${escapeHtml(label)}</span>`;
       }).join('');
@@ -684,9 +684,9 @@
   <div class="ar-conf-row">
     <span style="font-family:'Roboto Mono',monospace;font-size:10px;color:#94a3b8;min-width:72px">Confidence</span>
     <div class="ar-conf-track">
-      <div class="ar-conf-fill" style="width:${(conf*100).toFixed(1)}%;background:${color}"></div>
+      <div class="ar-conf-fill" style="width:${(conf * 100).toFixed(1)}%;background:${color}"></div>
     </div>
-    <span class="ar-conf-pct" style="color:${color}">${(conf*100).toFixed(1)}%</span>
+    <span class="ar-conf-pct" style="color:${color}">${(conf * 100).toFixed(1)}%</span>
   </div>
   <div class="ar-methods-row">${votePills}</div>
 </div>`.trim();
@@ -698,13 +698,13 @@
   // ---- Tab 2: Narrative Stage ----
 
   function _renderNarrativeTab(report, uid) {
-    const topStage  = report?.narrative_results?.top_stage ?? report?.narrative_stage ?? {};
+    const topStage = report?.narrative_results?.top_stage ?? report?.narrative_stage ?? {};
     const allStages = report?.narrative_results?.all_stages ?? [];
     const methodResults = report?.narrative_results?.method_results ?? [];
 
     const activeStage = topStage.stage ?? 'Curiosity';
-    const activeKey   = toStageKey(activeStage);
-    const activeIdx   = STAGE_ORDER.indexOf(activeKey);
+    const activeKey = toStageKey(activeStage);
+    const activeIdx = STAGE_ORDER.indexOf(activeKey);
 
     // Arc
     const arcNodes = STAGE_ORDER.map((key, i) => {
@@ -767,17 +767,17 @@
     const knownMethods = ['rule_based', 'fine_tuned', 'llm'];
     const methodCards = knownMethods.map(mk => {
       const result = methodResults.find(r => r.method === mk);
-      const topS   = result?.top_stage ?? {};
-      const stKey  = toStageKey(topS.stage ?? '');
-      const color  = STAGE_COLORS[stKey] ?? '#94a3b8';
-      const conf   = clamp01(topS.confidence ?? 0);
-      const label  = STAGE_LABELS[stKey] ?? topS.stage ?? '—';
+      const topS = result?.top_stage ?? {};
+      const stKey = toStageKey(topS.stage ?? '');
+      const color = STAGE_COLORS[stKey] ?? '#94a3b8';
+      const conf = clamp01(topS.confidence ?? 0);
+      const label = STAGE_LABELS[stKey] ?? topS.stage ?? '—';
 
       return `
 <div class="ar-method-card">
   <div class="ar-method-card-name">${escapeHtml(METHOD_LABELS[mk] ?? mk)}</div>
   <div class="ar-method-card-stage" style="color:${color}">${escapeHtml(label)}</div>
-  <div class="ar-method-card-conf">${(conf*100).toFixed(1)}% confidence</div>
+  <div class="ar-method-card-conf">${(conf * 100).toFixed(1)}% confidence</div>
 </div>`.trim();
     }).join('');
 
@@ -803,16 +803,16 @@ ${confidenceSection}
     return clinicalContexts.map((ctx, ctxIdx) => {
       const substance = ctx.substance ?? ctx.drug_name ?? '—';
       const drugClass = (ctx.drug_class ?? 'other').toLowerCase();
-      const color     = drugClassColor(drugClass);
-      const evidence  = ctx.evidence ?? ctx.chunks ?? [];
-      const faers     = ctx.faers_signals ?? [];
+      const color = drugClassColor(drugClass);
+      const evidence = ctx.evidence ?? ctx.chunks ?? [];
+      const faers = ctx.faers_signals ?? [];
 
       // Evidence chunks
       const chunkCards = evidence.slice(0, 5).map(chunk => {
-        const title   = chunk.chunk_filename ?? chunk.title ?? '—';
+        const title = chunk.chunk_filename ?? chunk.title ?? '—';
         const content = (chunk.text_snippet ?? chunk.content ?? '').slice(0, 180);
-        const score   = clamp01(chunk.relevance_score ?? chunk.score ?? 0);
-        const scorePct= (score * 100).toFixed(0);
+        const score = clamp01(chunk.relevance_score ?? chunk.score ?? 0);
+        const scorePct = (score * 100).toFixed(0);
 
         return `
 <div class="ar-chunk-card">
@@ -1005,7 +1005,7 @@ ${confidenceSection}
 
   // Caches for Charts data keyed by uid
   const _lastAllStageScores = {};
-  const _lastFaersSignals   = {};
+  const _lastFaersSignals = {};
 
   // ---------------------------------------------------------------------------
   // Copy brief button handler (global fn)
@@ -1049,17 +1049,17 @@ ${confidenceSection}
 
     const tl = gsap.timeline();
 
-    const banner  = container.querySelector('.ar-risk-banner');
+    const banner = container.querySelector('.ar-risk-banner');
     const metrics = container.querySelectorAll('.ar-metric-card');
-    const text    = container.querySelector('.ar-text-panel');
-    const tabBar  = container.querySelector('.ar-tab-bar');
-    const panel   = container.querySelector('.ar-tab-panel.active');
+    const text = container.querySelector('.ar-text-panel');
+    const tabBar = container.querySelector('.ar-tab-bar');
+    const panel = container.querySelector('.ar-tab-panel.active');
 
-    if (banner)        tl.fromTo(banner,  { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+    if (banner) tl.fromTo(banner, { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
     if (metrics.length) tl.fromTo(metrics, { opacity: 0, scale: 0.88 }, { opacity: 1, scale: 1, duration: 0.38, stagger: 0.07, ease: 'back.out(1.6)' }, '-=0.1');
-    if (text)           tl.fromTo(text,   { opacity: 0 }, { opacity: 1, duration: 0.28 }, '-=0.1');
-    if (tabBar)         tl.fromTo(tabBar, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.28 }, '-=0.1');
-    if (panel)          tl.fromTo(panel,  { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
+    if (text) tl.fromTo(text, { opacity: 0 }, { opacity: 1, duration: 0.28 }, '-=0.1');
+    if (tabBar) tl.fromTo(tabBar, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.28 }, '-=0.1');
+    if (panel) tl.fromTo(panel, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, '-=0.1');
 
     // Animate confidence bars after tl completes
     tl.call(() => {
@@ -1103,7 +1103,7 @@ ${confidenceSection}
   function _initSlideTabs(uid) {
     const bar = document.getElementById(`ar-tabs-${uid}`);
     if (!bar) return;
-    
+
     let cursor = bar.querySelector('.ar-slide-cursor');
     if (!cursor) {
       cursor = document.createElement('div');
@@ -1134,9 +1134,9 @@ ${confidenceSection}
     });
 
     bar.addEventListener('mouseleave', () => {
-       updateCursor(activeTab);
+      updateCursor(activeTab);
     });
-    
+
     window.addEventListener('resize', () => {
       requestAnimationFrame(() => updateCursor(activeTab));
     });

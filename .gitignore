@@ -1,20 +1,39 @@
+# Data & Models
 datasets/
 models/*
 !models/faiss_index.bin
 !models/bm25_index.pkl
 !models/chunk_metadata.json
+opioid_data/
+
+# Cache & Environments
 __pycache__/
 *.pyc
 .env
 *.cache
-.claude/
-evidence/**/*.png
-evidence/**/*.jpg
+.pytest_cache/
 .venv/
 cache/*
 !cache/demo_reports.json
 !cache/method_comparison.json
 !cache/narrative_distributions.json
 !cache/substance_proto_embeddings.pkl
-opioid_data/
+
+# Evidence (Ignore images except those needed for compiling the LaTeX report)
+evidence/**/*.png
+evidence/**/*.jpg
+!evidence/screenshots/narrative_pulse.png
+!evidence/screenshots/deep_analysis.png
+
+# Dev & Logs
+.claude/
+CLAUDE.md
 .DS_Store
+
+# Report Build Files
+report/*.aux
+report/*.log
+report/*.out
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
